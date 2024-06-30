@@ -1,98 +1,96 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const gameContainer = document.getElementById('game-container');
+    const canvas = document.getElementById('game-canvas');
+    const context = canvas.getContext('2d');
     const startButton = document.getElementById('start-button');
     const difficultySlider = document.getElementById('difficulty-slider');
     const difficultyLabel = document.getElementById('difficulty-label');
     const messageDiv = document.getElementById('message');
 
-    let size;
-    let cards = [];
-    let flipped = [];
-    let matched = [];
-    let firstFlip = null;
+    let numDisks = 3;
+    let towers = [];
+    let selectedTower = null;
+    let moves = 0;
 
     const difficulties = ['超易', '较易', '中等', '较难', '超难'];
 
     difficultySlider.addEventListener('input', (event) => {
         difficultyLabel.textContent = difficulties[event.target.value - 1];
+        numDisks = parseInt(event.target.value) + 2;  // Adjust number of disks based on difficulty
     });
 
     startButton.addEventListener('click', () => {
-        const level = parseInt(difficultySlider.value);
-        size = level + 2;
         messageDiv.textContent = '';
-        createGame(size);
-        displayGame(size);
+        towers = [Array.from({length: numDisks}, (_, i) => numDisks - i), [], []];
+        selectedTower = null;
+        moves = 0;
+        draw();
     });
 
-    function createGame(size) {
-        const icons = ['⚽️', '🏀', '🏈', '⚾️', '🎾', '🎱', '🥎', '🏐', '🏉', '🥏', '🎳', '🏓', '🏸', '🥊', '🥋', '⛳️', '🥅', '⛸', '🥌', '🎿', '🏂', '🏋️‍♂️', '🏋️‍♀️', '🤼‍♂️', '🤼‍♀️', '🤸‍♂️', '🤸‍♀️', '⛹️‍♂️', '⛹️‍♀️', '🤺', '🤿', '🏊‍♂️', '🏊‍♀️', '🤽‍♂️', '🤽‍♀️', '🚴‍♂️', '🚴‍♀️', '🚵‍♂️', '🚵‍♀️', '🏇', '🧘‍♂️', '🧘‍♀️', '🏄‍♂️', '🏄‍♀️', '🏆', '🥇', '🥈', '🥉'];
-        randomShuffle(icons);
-        const selectedIcons = icons.slice(0, (size * size) / 2);
-        const pairs = selectedIcons.concat(selectedIcons);
-        randomShuffle(pairs);
-        cards = [];
-        for (let i = 0; i < size; i++) {
-            cards.push(pairs.slice(i * size, (i + 1) * size));
-        }
-        flipped = Array.from({ length: size }, () => Array(size).fill(false));
-        matched = Array.from({ length: size }, () => Array(size).fill(false));
-    }
+    canvas.addEventListener('click', (event) => {
+        const rect = canvas.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        const towerWidth = canvas.width / 3;
+        const clickedTower = Math.floor(x / towerWidth);
 
-    function displayGame(size) {
-        gameContainer.innerHTML = '';
-        gameContainer.style.gridTemplateColumns = `repeat(${size}, 60px)`;
-        for (let r = 0; r < size; r++) {
-            for (let c = 0; c < size; c++) {
-                const cell = document.createElement('div');
-                cell.classList.add('cell');
-                cell.addEventListener('click', () => handleCellClick(r, c));
-                gameContainer.appendChild(cell);
+        if (selectedTower === null) {
+            if (towers[clickedTower].length > 0) {
+                selectedTower = clickedTower;
             }
-        }
-    }
-
-    function handleCellClick(row, col) {
-        if (flipped[row][col] || matched[row][col]) return;
-        flipped[row][col] = true;
-        updateCell(row, col);
-        if (!firstFlip) {
-            firstFlip = { row, col };
         } else {
-            const { row: row1, col: col1 } = firstFlip;
-            if (cards[row1][col1] === cards[row][col]) {
-                matched[row1][col1] = true;
-                matched[row][col] = true;
-                if (matched.flat().every(Boolean)) {
-                    messageDiv.textContent = '恭喜成功！';
-                }
-            } else {
-                setTimeout(() => {
-                    flipped[row1][col1] = false;
-                    flipped[row][col] = false;
-                    updateCell(row1, col1);
-                    updateCell(row, col);
-                }, 1000);
+            if (moveDisk(selectedTower, clickedTower)) {
+                moves++;
             }
-            firstFlip = null;
+            selectedTower = null;
+            draw();
+        }
+    });
+
+    function draw() {
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        const towerWidth = canvas.width / 3;
+        const diskHeight = canvas.height / (numDisks + 1);
+
+        towers.forEach((tower, i) => {
+            const towerX = i * towerWidth;
+            tower.forEach((disk, j) => {
+                const diskWidth = (disk / numDisks) * (towerWidth - 20);
+                const diskX = towerX + (towerWidth - diskWidth) / 2;
+                const diskY = canvas.height - (j + 1) * diskHeight;
+                context.fillStyle = i === selectedTower ? 'lightblue' : 'gray';
+                context.fillRect(diskX, diskY, diskWidth, diskHeight - 2);
+            });
+        });
+
+        if (isSolved()) {
+            // showResult('✔️', 'green');
+						messageDiv.textContent = '恭喜成功！';
         }
     }
 
-    function updateCell(row, col) {
-        const cell = gameContainer.children[row * size + col];
-        if (flipped[row][col] || matched[row][col]) {
-            cell.textContent = cards[row][col];
-            cell.classList.add('flipped');
-        } else {
-            cell.textContent = '';
-            cell.classList.remove('flipped');
+    function moveDisk(fromTower, toTower) {
+        if (towers[fromTower].length === 0) {
+            return false;
         }
+        if (towers[toTower].length === 0 || towers[toTower][towers[toTower].length - 1] > towers[fromTower][towers[fromTower].length - 1]) {
+            towers[toTower].push(towers[fromTower].pop());
+            return true;
+        }
+        return false;
     }
 
-    function randomShuffle(array) {
-        for (let i = array.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [array[i], array[j]] = [array[j], array[i]];
-        }
+    function isSolved() {
+        return towers[2].length === numDisks;
     }
+
+    function showResult(result, color) {
+        context.fillStyle = color;
+        context.font = '40px Arial';
+        context.textAlign = 'center';
+        context.fillText(result, canvas.width / 2, canvas.height / 2);
+    }
+
+    // Initialize game
+    canvas.width = window.innerWidth * 0.8;
+    canvas.height = window.innerHeight * 0.6;
+    draw();
 });
