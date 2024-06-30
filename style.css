@@ -1,0 +1,42 @@
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    background-color: #f0f0f0;
+}
+
+#game-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 20px auto;
+}
+
+canvas {
+    border: 1px solid black;
+}
+
+button {
+    margin-top: 20px;
+    padding: 15px 30px;
+    font-size: 18px;
+    cursor: pointer;
+}
+
+#difficulty-container {
+    margin-top: 20px;
+}
+
+#difficulty-slider {
+    width: 50%;
+}
+
+#error {
+    color: red;
+    font-size: 18px;
+}
+
+#message {
+    margin-top: 20px;
+    font-size: 18px;
+    color: green;
+}
