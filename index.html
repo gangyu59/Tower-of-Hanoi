@@ -17,13 +17,51 @@
 </head>
 <body>
     <h1>Tower of Hanoi</h1>
+    <div id="move-counter">移动次数 = 0</div>
     <div id="game-container">
         <canvas id="game-canvas"></canvas>
     </div>
-    <button id="start-button">开始</button>
-    <label for="difficulty-slider">难度：</label>
-    <input type="range" id="difficulty-slider" min="1" max="5" value="3">
-    <span id="difficulty-label">中等</span>
+    <div id="controls">
+        <label for="difficulty-slider">难度：
+				<span id="difficulty-label">中等</span>
+				</label>
+				<input type="range" id="difficulty-slider" class="slider" min="1" max="5" value="3">
+    </div>
+    <button id="start-button">开始</button><br>
+    <button id="rules-button">游戏规则</button>
     <div id="message"></div>
+
+    <div id="rules-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <h2>游戏规则</h2>
+            <p>N个圆盘从小到大依次叠放在左边，需要将所有圆盘以最少的步数从左面通过中间的临时放置区移动到右边，遵守以下规则：</p>
+            <ul style="text-align: left;">
+                <li>一次只能移动一个圆盘</li>
+                <li>大的圆盘不能放在小的圆盘上面</li>
+                <li>点击一个最上方的圆盘后再点击一个空位或者另一个圆盘来完成移动</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        const modal = document.getElementById("rules-modal");
+        const btn = document.getElementById("rules-button");
+        const span = document.getElementsByClassName("close-button")[0];
+
+        btn.onclick = function() {
+            modal.style.display = "block";
+        }
+
+        span.onclick = function() {
+            modal.style.display = "none";
+        }
+
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+    </script>
 </body>
 </html>

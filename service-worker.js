@@ -7,6 +7,7 @@ self.addEventListener('install', (event) => {
                 './main.js',
                 './manifest.json',
                 './service-worker.js'
+                // Add other files you want to cache
             ]);
         }).catch(error => {
             console.error('Caching failed:', error);

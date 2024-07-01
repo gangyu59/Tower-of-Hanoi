@@ -5,6 +5,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const difficultySlider = document.getElementById('difficulty-slider');
     const difficultyLabel = document.getElementById('difficulty-label');
     const messageDiv = document.getElementById('message');
+    const moveCounter = document.getElementById('move-counter');
+    const rulesButton = document.getElementById('rules-button');
+    const modal = document.getElementById('rules-modal');
+    const closeButton = document.querySelector('.close-button');
 
     let numDisks = 3;
     let towers = [];
@@ -20,9 +24,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     startButton.addEventListener('click', () => {
         messageDiv.textContent = '';
-        towers = [Array.from({length: numDisks}, (_, i) => numDisks - i), [], []];
+        towers = [Array.from({ length: numDisks }, (_, i) => numDisks - i), [], []];
         selectedTower = null;
         moves = 0;
+        moveCounter.textContent = `移动次数 = ${moves}`;
         draw();
     });
 
@@ -39,6 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             if (moveDisk(selectedTower, clickedTower)) {
                 moves++;
+                moveCounter.textContent = `移动次数 = ${moves}`;
             }
             selectedTower = null;
             draw();
@@ -62,8 +68,8 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         if (isSolved()) {
-            // showResult('✔️', 'green');
-						messageDiv.textContent = '恭喜成功！';
+            messageDiv.style.color = 'green';
+						messageDiv.textContent = `恭喜成功！一共用了${moves}步。`;
         }
     }
 
@@ -82,15 +88,23 @@ document.addEventListener('DOMContentLoaded', () => {
         return towers[2].length === numDisks;
     }
 
-    function showResult(result, color) {
-        context.fillStyle = color;
-        context.font = '40px Arial';
-        context.textAlign = 'center';
-        context.fillText(result, canvas.width / 2, canvas.height / 2);
-    }
-
     // Initialize game
     canvas.width = window.innerWidth * 0.8;
     canvas.height = window.innerHeight * 0.6;
     draw();
+
+    // Rules modal
+    rulesButton.addEventListener('click', () => {
+        modal.style.display = 'block';
+    });
+
+    closeButton.addEventListener('click', () => {
+        modal.style.display = 'none';
+    });
+
+    window.addEventListener('click', (event) => {
+        if (event.target === modal) {
+            modal.style.display = 'none';
+        }
+    });
 });
