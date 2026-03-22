@@ -10,7 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const modal = document.getElementById('rules-modal');
     const closeButton = document.querySelector('.close-button');
 
-    let numDisks = 3;
+    let numDisks = parseInt(difficultySlider.value) + 2;
     let towers = [];
     let selectedTower = null;
     let moves = 0;
